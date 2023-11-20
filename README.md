@@ -1,26 +1,26 @@
-# JediSecretsVault
+# Jedi Secrets Vault
 
 ## Overview
-I've chosen to use Terraform modules to keep the code readable and easier to maintain it.
-The project uses these AWS services: Lambda, S3, KMS, and Secrets Manager, IAM.
+This project employs Terraform modules for enhanced readability and maintainability. It integrates several AWS services, including Lambda, S3, KMS, Secrets Manager, and IAM, to manage and process Jedi-related data securely.
 
 ## Project Structure
 
-- **modules/**: Contains reusable Terraform modules.
-  - **iam/**: Module for creating IAM roles and policies.
-  - **kms/**: Module for creating the KMS key for encrypting data in the S3 bucket.
-  - **lambda/**: Module for creating the Lambda function to process Jedi manifests uploaded to the S3 bucket.
-  - **s3/**: Module for creating the S3 bucket encrypted with KMS where Jedi manifests can be uploaded.
-  - **secrets_manager/**: Module for creating the secret in AWS Secrets Manager to securely store the Jedi ID.
-- **main.tf**: Main Terraform file that uses the above modules.
-- **variables.tf**: Definitions of variables used in `main.tf`.
-- **lambda_function.zip**: Zip archive containing the source code for the Lambda function.
+- **modules/**: This directory contains the Terraform modules used across the project.
+  - **iam/**: A module dedicated to creating IAM roles and policies.
+  - **kms/**: A module for generating a KMS key to secure data within the S3 bucket.
+  - **lambda/**: This module manages the Lambda function responsible for processing Jedi manifests in the S3 bucket.
+  - **s3/**: Manages the S3 bucket, encrypted with the KMS key, for storing Jedi updated manifests.
+  - **secrets_manager/**: Handles the creation of a secret in AWS Secrets Manager for the safekeeping of the Jedi ID.
+- **main.tf**: The primary Terraform script that incorporates the other modules.
+- **lambda_function.zip**: A zip file containing the Lambda function's source code.
 
-## Other comments:
-- In a real enviroment should have been better to keep the lambda function code in an S3 bucket and reference it from the terraform configuration.
-- The value for the 'jediID' secret isn't defined as variable but I assume that is given to Terraform as ENV variable (export  TF_VAR_jedi_id='xxx') or as variable during Terraform execution (terraform apply -var="jedi_id=xxx")
-- I assume that already exist a role called 'councilRole' with the necessary permission
-- most of the policies have permission on all resources (Resource = '*') for simplicity
+All the modules containes the `main.tf` file for the resource definition, the `variables.tf` file for the definition of the variables used in the `main.tf` and, if needed, the `outputs.tf` file for exposing the outputs of modules to other ones.
 
-## Lambda execution
-The lambda function is executed whenever a new manifest is uploaded to S3. This, after parsing the manifest json and retrieving the ID of the Jedi of interest, returns information about the requested Jedi, if it is present in the manifest.
+## Implementation Notes:
+- In a production environment, it's advisable to store the Lambda function code in an S3 bucket and reference it in the Terraform configuration instead of using a zip file as done here.
+- The 'jediID' secret is not set as a variable but is expected to be provided as an environment variable to Terraform (e.g., `export TF_VAR_jedi_id='xxx'`) or as a runtime variable (e.g., `terraform apply -var="jedi_id=xxx"`).
+- It is assumed that a role named `councilRole` with requisite permissions already exists.
+- For simplicity, most policies are configured with permissions on all resources (`Resource = '*'`).
+
+## Lambda Execution
+The Lambda function triggers upon the upload of a new manifest to the S3 bucket. It gets the Jedi ID from the secrets, processes the manifest JSON to extract the relevant Jedi ID and returns information about the specified Jedi, if present in the manifest.

@@ -33,6 +33,7 @@ module "s3" {
 }
 
 module "secrets_manager" {
-  source   = "./modules/secrets_manager"
+  source = "./modules/secrets_manager"
   jedi_secret_name = "jediID"
+  jedi_secret_value = var.jedi_id
 }
